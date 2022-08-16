@@ -30,27 +30,12 @@ forge test -vvv --etherscan-api-key $ETHERSCAN_API_KEY
 
 ### Setup
 
-```bash
-export MAINNET_RPC_URL=https://mainnet.infura.io/v3/$INFURA_ID
-forge install
-```
-
 Note that dependencies are managed via git submodules and the below is purely for reference:
 
 ```bash
+forge install foundry-rs/forge-std
 forge install transmissions11/solmate
-forge install OpenZeppelin/openzeppelin-contracts@v3.4.1-solc-0.7
-forge install Uniswap/v3-periphery@v1.3.0
-forge install Uniswap/v3-core@v1.0.0
-forge install ichifarm/util-contracts
-forge install ichi-oneToken=git@github.com:ichifarm/ichi-oneToken.git@1.0.0
-```
-
-If installing the ichifarm/util-contracts doesn't work try the following:
-
-```bash
-cd lib
-git submodule add git@github.com:ichifarm/util-contracts.git
+forge install OpenZeppelin/openzeppelin-contracts@v4.7.3
 ```
 
 ### Building
@@ -63,7 +48,7 @@ forge build
 
 ```bash
 forge test -vvv --etherscan-api-key $ETHERSCAN_API_KEY
-forge test -vvv --match-test "testMoveIchiPrice" --etherscan-api-key $ETHERSCAN_API_KEY
+forge test -vvv --match-test "testName" --etherscan-api-key $ETHERSCAN_API_KEY
 ```
 
 ### Analyzing
@@ -73,7 +58,7 @@ pip3 install slither-analyzer
 pip3 install solc-select
 solc-select install 0.8.16
 solc-select use 0.8.16
-slither src/contracts/ICHISpotOracleUSDUniswapV3.sol
+slither src/contracts/Contract.sol
 ```
 
 ### Test Deploy to Forked Mainnet
@@ -86,7 +71,7 @@ anvil --fork-url https://mainnet.infura.io/v3/$INFURA_ID
 # Deploy via scripting, not verification won't
 # work in a forked environment
 # --------------------------------------------------
-forge script script/DeployICHISpotOracleUSDUniswapV3.mainnet.s.sol:DeployICHISpotOracleUSDUniswapV3 \
+forge script script/DeployContract.mainnet.s.sol:DeployContract \
   --fork-url http://localhost:8545 \
   --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 \
   --broadcast \
@@ -100,8 +85,7 @@ forge script script/DeployICHISpotOracleUSDUniswapV3.mainnet.s.sol:DeployICHISpo
 # Note verification won't work in a forked env.
 # --------------------------------------------------
 forge create --rpc-url http://localhost:8545 \
-  --constructor-args 0x111111517e4929D3dcbdfa7CCe55d30d4B6BC4d6 10000 \
-  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 src/contracts/ICHISpotOracleUSDUniswapV3.sol:ICHISpotOracleUSDUniswapV3 \
+  --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 src/contracts/Contract.sol:Contract \
   --etherscan-api-key $ETHERSCAN_API_KEY \
 ```
 
@@ -112,10 +96,12 @@ Have a test MetaMask wellet and switch it to Goerli.
 Use [https://goerlifaucet.com/](https://goerlifaucet.com/) to send some Goerli ETH.
 
 ```bash
+export SENDER=<Account address, for ex. a MetaMask test account address>
+
 # --------------------------------------------------
 # Deploy the contract via the Forge scripting
 # --------------------------------------------------
-forge script script/DeployICHISpotOracleUSDUniswapV3.goerli.s.sol:DeployICHISpotOracleUSDUniswapV3 \
+forge script script/DeployContract.goerli.s.sol:DeployContract \
   --rpc-url https://goerli.infura.io/v3/$INFURA_ID \
   -i 1 \
   --optimize \
@@ -130,7 +116,7 @@ forge script script/DeployICHISpotOracleUSDUniswapV3.goerli.s.sol:DeployICHISpot
 # If the verification fails above re-run the above
 # without the --broadcast to re-check the verification
 # --------------------------------------------------
-forge script script/DeployICHISpotOracleUSDUniswapV3.goerli.s.sol:DeployICHISpotOracleUSDUniswapV3 \
+forge script script/DeployContract.goerli.s.sol:DeployContract \
   --rpc-url https://goerli.infura.io/v3/$INFURA_ID \
   -i 1 \
   --optimize \
@@ -150,7 +136,7 @@ forge create --chain goerli \
   --optimizer-runs 200 \
   --rpc-url https://goerli.infura.io/v3/$INFURA_ID \
   --constructor-args 0x9b0757aCaCA5160CEBc3D16769E4f2bCe71BFbF2 10000 \
-  -i src/contracts/ICHISpotOracleUSDUniswapV3.flattened.sol:ICHISpotOracleUSDUniswapV3 \
+  -i src/contracts/Contract.sol:Contract \
   --etherscan-api-key $ETHERSCAN_API_KEY \
   --verify
 
@@ -160,8 +146,7 @@ forge create --chain goerli \
 # ------------------------------------------------------
 forge verify-contract --chain-id 5 \
   --num-of-optimizations 200 \
-  --constructor-args $(cast abi-encode "constructor(address,uint24)" 0x9b0757aCaCA5160CEBc3D16769E4f2bCe71BFbF2 10000) \
-  0x54b0E44840032EdcD03a27e3a0cb77a64aD6204A src/contracts/ICHISpotOracleUSDUniswapV3.sol:ICHISpotOracleUSDUniswapV3 $ETHERSCAN_API_KEY
+  0x54b0E44840032EdcD03a27e3a0cb77a64aD6204A src/contracts/Deploy.sol:Deploy $ETHERSCAN_API_KEY
 
 # ------------------------------------------------------
 # Manually check the status of a verification GUID
@@ -182,7 +167,7 @@ References:
 ### Debugging
 
 ```bash
-forge test -vvv --debug "testMoveIchiPrice" --etherscan-api-key $ETHERSCAN_API_KEY
+forge test -vvv --debug "testName" --etherscan-api-key $ETHERSCAN_API_KEY
 ```
 
 ### Deployment & Verification

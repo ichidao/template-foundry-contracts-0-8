@@ -1,20 +1,18 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity 0.8.16;
+pragma solidity ^0.8;
 
 import {Script} from "forge-std/Script.sol";
 
-import {ICHISpotOracleUSDUniswapV3} from "src/contracts/ICHISpotOracleUSDUniswapV3.sol";
+import {Contract} from "src/contracts/Contract.sol";
 
-/// @notice Deploy the ICHISpotOracleUSDUniswapV3 contract
-contract DeployICHISpotOracleUSDUniswapV3 is Script {
-    address constant ICHI_V2_ADDRESS = 0x9b0757aCaCA5160CEBc3D16769E4f2bCe71BFbF2;
+/// @notice Deploy the Contract contract
+contract DeployContract is Script {
 
     /// @notice The main script entrypoint
-    /// @return oracle The deployed contract
-    function run() external returns (ICHISpotOracleUSDUniswapV3 oracle) {
+    /// @return c The deployed contract
+    function run() external returns (Contract c) {
         vm.startBroadcast();
-        oracle = new ICHISpotOracleUSDUniswapV3(ICHI_V2_ADDRESS, 10000);
+        c = new Contract();
         vm.stopBroadcast();
     }
 }
