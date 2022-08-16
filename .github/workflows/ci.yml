@@ -1,0 +1,106 @@
+name: ci
+
+on: [push]
+
+# https://github.com/actions/checkout/issues/116
+# Note that ssh deploy keys are better with submodules however it get's dedious 
+# with multiple private repos so I'm using a PAT token, which is less secure
+# however, there is no sensitive info here as the contracts are public.
+jobs:
+  tests:
+    name: Forge Testing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          token: ${{ secrets.SAMUEL_PAT_LIMITED }}
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: onbjerg/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run Tests
+        run: |
+          forge test -vvv --etherscan-api-key $ETHERSCAN_API_KEY
+        env:
+          MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+
+  # snapshot:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         # ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         token: ${{ secrets.SAMUEL_PAT_LIMITED }}
+  #         submodules: recursive
+
+  #     - name: Install Foundry
+  #       uses: foundry-rs/foundry-toolchain@v1
+  #       with:
+  #         version: nightly
+
+  #     - name: Check gas snapshots
+  #       run: forge snapshot --check
+  #       env:
+  #         MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
+
+  # This errors out currently
+  # slither:
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       node-version: [16.x]
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         # ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
+  #         token: ${{ secrets.SAMUEL_PAT_LIMITED }}
+  #         submodules: recursive
+
+  #     - name: Install Foundry
+  #       uses: foundry-rs/foundry-toolchain@v1
+  #       with:
+  #         version: nightly
+
+  #     - name: Run Slither
+  #       uses: crytic/slither-action@main
+  #       id: slither
+  #       with:
+  #         target: 'src/'
+  #         slither-args: '--exclude solc-version'
+  #       env:
+  #         MAINNET_RPC_URL: ${{ secrets.MAINNET_RPC_URL }}
+
+  # scripts:
+  #   strategy:
+  #     fail-fast: true
+  #   name: Run Unix Scripts
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         submodules: recursive
+
+  #     - name: Install Foundry
+  #       uses: foundry-rs/foundry-toolchain@v1
+  #       with:
+  #         version: nightly
+
+  #     - name: Run Forge build
+  #       run: |
+  #         forge --version
+  #         forge build --sizes
+  #       id: build
+  #       continue-on-error: true
+
+  #     - name: Run scripts
+  #       run: |
+  #         ls -lsa
+  #         ls script/
+  #         for file in script/*; do
+  #           forge script $file
+  #         done
