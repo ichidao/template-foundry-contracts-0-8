@@ -1,4 +1,14 @@
-# Getting Started
+# Introduction
+
+This is a forge template repo so you can easily get started with Foundry with Solidity 0.8.  To use this as a template do the following:
+
+```bash
+forge init --template https://github.com/ichidao/template-foundry-contracts-0-8 project_name
+```
+
+Below is instructions for using this developing and using Foundry/forge with this project.
+
+## Getting Started
 
 Note that this is a template repository targeting Solidity 0.8 and you should create new repos and target this as a template.
 
